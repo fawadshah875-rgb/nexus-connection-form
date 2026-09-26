@@ -1,0 +1,655 @@
+@model NexusApp.Models.ConnectionFormData
+@{
+    ViewData["Title"] = "NEXUS - Apply for New Connection";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <style>
+        :root {
+            --header-bg: #010d1e;
+            --primary: #1385ec;
+            --primary-dark: #0d6bcc;
+            --text: #2d4f6c;
+            --muted: #7a8ea2;
+            --line: #dfeaf4;
+            --page-bg: #edf4fb;
+            --panel-bg: rgba(255,255,255,0.85);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--page-bg);
+            color: var(--text);
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--page-bg);
+        }
+
+        .topbar {
+            height: 72px;
+            background: linear-gradient(to bottom, #05192d, #020d1d);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px 0 22px;
+            box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
+        }
+
+        .brand {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #f7fbff;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-left: auto;
+            margin-right: 10px;
+        }
+
+        .nav a {
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            font-size: 9px;
+            text-transform: capitalize;
+        }
+
+        .search-icon {
+            width: 34px;
+            height: 34px;
+            border: 1px solid rgba(168, 208, 255, 0.85);
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: calc(100vh - 72px);
+        }
+
+        .sidebar {
+            padding: 14px 10px 0 10px;
+            border-right: 1px solid rgba(118,142,163,0.2);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .step-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .step-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            height: 54px;
+            padding: 0 12px;
+            font-size: 12px;
+            color: #7d95a6;
+            cursor: pointer;
+            border-radius: 8px 0 0 8px;
+            transition: 0.2s ease;
+        }
+
+        .step-item:hover {
+            background: rgba(19, 122, 225, 0.05);
+        }
+
+        .step-item.active {
+            background: rgba(21, 125, 231, 0.10);
+            color: #1a79da;
+            font-weight: 600;
+        }
+
+        .step-item.active .bullet {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(19,122,225,0.12);
+        }
+
+        .step-item.completed .bullet {
+            background: #16a34a;
+            border-color: #16a34a;
+            color: white;
+        }
+
+        .step-item.completed .bullet::after {
+            content: "✓";
+            font-size: 13px;
+        }
+
+        .step-item:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 18px;
+            top: 48px;
+            width: 1.8px;
+            height: 16px;
+            background: #d6e1ec;
+        }
+
+        .bullet {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid #c5d5e3;
+            display: grid;
+            place-items: center;
+            background: white;
+            font-size: 11px;
+            font-weight: 700;
+            flex-shrink: 0;
+            transition: 0.2s ease;
+        }
+
+        .main {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 32px 20px 20px 20px;
+        }
+
+        .form-card {
+            width: 100%;
+            max-width: 760px;
+            min-height: 460px;
+            padding: 18px 24px 12px 24px;
+            background: rgba(255,255,255,0.57);
+            border: 1px solid rgba(182, 204, 222, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(16, 51, 78, 0.08);
+        }
+
+        .title {
+            margin: 0 0 18px 0;
+            font-size: 21px;
+            font-weight: 700;
+            color: #1b4d73;
+        }
+
+        .section {
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .field-group {
+            margin-bottom: 12px;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #4b6d89;
+        }
+
+        .radio-row {
+            display: flex;
+            gap: 28px;
+            margin: 4px 0 10px 0;
+        }
+
+        .radio-option {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #466a88;
+            font-size: 13px;
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1.5px solid #b4c5d3;
+            background: white;
+            margin: 0;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"]:checked {
+            border-color: #2e8ef0;
+        }
+
+        .radio-option input[type="radio"]:checked::after {
+            content: "";
+            position: absolute;
+            inset: 3px;
+            background: #2e8ef0;
+            border-radius: 50%;
+        }
+
+        .field {
+            width: 100%;
+            height: 38px;
+            border: 1px solid #d4e0ea;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.38);
+            outline: none;
+            padding: 0 12px;
+            font-size: 13px;
+            color: var(--text);
+            font-family: inherit;
+            transition: 0.2s ease;
+        }
+
+        .field::placeholder {
+            color: #9aa9b6;
+        }
+
+        .field:focus {
+            border-color: #62aaf0;
+            box-shadow: 0 0 0 3px rgba(59,150,234,0.12);
+        }
+
+        .field.error {
+            border-color: #ef4444;
+        }
+
+        .button-row {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn {
+            min-width: 126px;
+            height: 40px;
+            border-radius: 6px;
+            border: 1px solid #d5e3ee;
+            background: #f5fafe;
+            color: #466d89;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background: #edf5fd;
+        }
+
+        .btn.primary {
+            background: linear-gradient(to bottom, #0a7fe7, #0967c1);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(17, 112, 217, 0.24);
+        }
+
+        .btn.primary:hover {
+            background: linear-gradient(to bottom, #0a74d8, #0758a4);
+        }
+
+        .success-msg {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            color: #166534;
+            padding: 12px 14px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 13px;
+        }
+
+        @@media (max-width: 860px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid rgba(118,142,163,0.2);
+                padding: 10px 8px;
+            }
+
+            .step-list {
+                display: flex;
+                overflow-x: auto;
+                gap: 8px;
+            }
+
+            .step-item {
+                min-width: 140px;
+                border: 1px solid rgba(197,213,227,0.8);
+                background: rgba(255,255,255,0.2);
+            }
+
+            .step-item:not(:last-child)::after {
+                display: none;
+            }
+        }
+
+        @@media (max-width: 560px) {
+            .topbar {
+                padding: 0 12px;
+            }
+
+            .nav a {
+                display: none;
+            }
+
+            .brand {
+                font-size: 24px;
+            }
+
+            .title {
+                font-size: 18px;
+            }
+
+            .form-card {
+                padding: 16px 14px;
+            }
+
+            .button-row {
+                margin-top: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header class="topbar">
+            <div class="brand">NEXUS</div>
+            <nav class="nav">
+                <a href="#">Home</a>
+                <a href="#">Services</a>
+                <a href="#">Plans</a>
+                <a href="#">Support</a>
+                <div class="search-icon">⌕</div>
+            </nav>
+        </header>
+
+        <div class="content">
+            <aside class="sidebar">
+                <ul class="step-list">
+                    <li class="step-item active" data-step="1">
+                        <span class="bullet">1</span>
+                        <span>Service Type</span>
+                    </li>
+                    <li class="step-item" data-step="2">
+                        <span class="bullet">2</span>
+                        <span>Plan Selection</span>
+                    </li>
+                    <li class="step-item" data-step="3">
+                        <span class="bullet">3</span>
+                        <span>Customer Details</span>
+                    </li>
+                    <li class="step-item" data-step="4">
+                        <span class="bullet">4</span>
+                        <span>Address &amp; Documents</span>
+                    </li>
+                    <li class="step-item" data-step="5">
+                        <span class="bullet">5</span>
+                        <span>Review &amp; Submit</span>
+                    </li>
+                </ul>
+            </aside>
+
+            <main class="main">
+                <div class="form-card">
+                    <h1 class="title">Apply for New Connection</h1>
+                    <div id="successMsg"></div>
+
+                    <!-- Step 1: Service Type -->
+                    <div class="section active" data-section="1">
+                        <div class="field-group">
+                            <label class="label">Service Type</label>
+                            <div class="radio-row">
+                                <label class="radio-option">
+                                    <input type="radio" name="serviceType" value="Dial-Up" checked />
+                                    <span>Dial-Up</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="serviceType" value="Broadband" />
+                                    <span>Broadband</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Plan Selection -->
+                    <div class="section" data-section="2">
+                        <div class="field-group">
+                            <label class="label" for="plan">Plan</label>
+                            <select id="plan" class="field">
+                                <option>Select Plan</option>
+                                <option>Basic Plan - $19/month</option>
+                                <option>Standard Plan - $39/month</option>
+                                <option>Premium Plan - $69/month</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Customer Details -->
+                    <div class="section" data-section="3">
+                        <div class="field-group">
+                            <label class="label" for="name">Customer Name</label>
+                            <input id="name" class="field" type="text" placeholder="Enter full name" />
+                        </div>
+                        <div class="field-group">
+                            <label class="label" for="phone">Phone No.</label>
+                            <input id="phone" class="field" type="text" placeholder="Enter phone number" />
+                        </div>
+                        <div class="field-group">
+                            <label class="label" for="email">Email</label>
+                            <input id="email" class="field" type="email" placeholder="Enter email address" />
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Address & Documents -->
+                    <div class="section" data-section="4">
+                        <div class="field-group">
+                            <label class="label" for="address">Address</label>
+                            <input id="address" class="field" type="text" placeholder="Enter address" />
+                        </div>
+                        <div class="field-group">
+                            <label class="label" for="city">City</label>
+                            <input id="city" class="field" type="text" placeholder="Enter city" />
+                        </div>
+                        <div class="field-group">
+                            <label class="label" for="postal">Postal Code</label>
+                            <input id="postal" class="field" type="text" placeholder="Enter postal code" />
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Review -->
+                    <div class="section" data-section="5">
+                        <div class="field-group">
+                            <label class="label">Service Type:</label>
+                            <span id="reviewService" style="font-weight: 600; color: #1b4d73;">Dial-Up</span>
+                        </div>
+                        <div class="field-group">
+                            <label class="label">Plan:</label>
+                            <span id="reviewPlan" style="font-weight: 600; color: #1b4d73;">Select Plan</span>
+                        </div>
+                        <div class="field-group">
+                            <label class="label">Name:</label>
+                            <span id="reviewName" style="font-weight: 600; color: #1b4d73;">-</span>
+                        </div>
+                        <div class="field-group">
+                            <label class="label">Phone:</label>
+                            <span id="reviewPhone" style="font-weight: 600; color: #1b4d73;">-</span>
+                        </div>
+                        <div class="field-group">
+                            <label class="label">City:</label>
+                            <span id="reviewCity" style="font-weight: 600; color: #1b4d73;">-</span>
+                        </div>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="btn" id="backBtn" type="button" style="visibility: hidden;">← Back</button>
+                        <button class="btn primary" id="nextBtn" type="button">Next</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        const stepItems = document.querySelectorAll('.step-item');
+        const sections = document.querySelectorAll('.section');
+        const backBtn = document.getElementById('backBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        function showStep(step) {
+            currentStep = step;
+
+            // Update sections
+            sections.forEach(section => {
+                section.classList.toggle('active', Number(section.dataset.section) === step);
+            });
+
+            // Update sidebar steps
+            stepItems.forEach(item => {
+                const itemStep = Number(item.dataset.step);
+                item.classList.toggle('active', itemStep === step);
+                item.classList.toggle('completed', itemStep < step);
+            });
+
+            // Update buttons
+            backBtn.style.visibility = step === 1 ? 'hidden' : 'visible';
+            nextBtn.textContent = step === totalSteps ? '✓ Submit' : 'Next';
+
+            // Update review section
+            if (step === totalSteps) {
+                updateReview();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateStep() {
+            if (currentStep === 3) {
+                const name = document.getElementById('name').value.trim();
+                const phone = document.getElementById('phone').value.trim();
+                const email = document.getElementById('email').value.trim();
+
+                let valid = true;
+                if (!name) {
+                    document.getElementById('name').classList.add('error');
+                    valid = false;
+                } else {
+                    document.getElementById('name').classList.remove('error');
+                }
+
+                if (!phone) {
+                    document.getElementById('phone').classList.add('error');
+                    valid = false;
+                } else {
+                    document.getElementById('phone').classList.remove('error');
+                }
+
+                if (!email) {
+                    document.getElementById('email').classList.add('error');
+                    valid = false;
+                } else {
+                    document.getElementById('email').classList.remove('error');
+                }
+
+                return valid;
+            }
+
+            if (currentStep === 4) {
+                const city = document.getElementById('city').value.trim();
+                if (!city) {
+                    document.getElementById('city').classList.add('error');
+                    return false;
+                }
+                document.getElementById('city').classList.remove('error');
+            }
+
+            return true;
+        }
+
+        function updateReview() {
+            document.getElementById('reviewService').textContent = document.querySelector('input[name="serviceType"]:checked').value;
+            document.getElementById('reviewPlan').textContent = document.getElementById('plan').value;
+            document.getElementById('reviewName').textContent = document.getElementById('name').value || '-';
+            document.getElementById('reviewPhone').textContent = document.getElementById('phone').value || '-';
+            document.getElementById('reviewCity').textContent = document.getElementById('city').value || '-';
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < totalSteps) {
+                if (!validateStep()) return;
+                showStep(currentStep + 1);
+            } else {
+                fetch('/Home/SubmitForm', { method: 'POST' })
+                    .then(() => {
+                        document.getElementById('successMsg').innerHTML = '<div class="success-msg">✓ Application submitted successfully!</div>';
+                        setTimeout(() => { location.reload(); }, 2000);
+                    });
+            }
+        });
+
+        backBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        });
+
+        stepItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const step = Number(item.dataset.step);
+                if (step <= currentStep) {
+                    showStep(step);
+                }
+            });
+        });
+
+        showStep(1);
+    </script>
+</body>
+</html>
